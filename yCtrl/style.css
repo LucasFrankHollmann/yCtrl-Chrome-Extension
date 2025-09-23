@@ -1,0 +1,90 @@
+body{
+    background-color: #2B243B;
+    margin: 0px;
+}
+
+.tabDiv{
+    width: 200px;
+    height: 60px;
+    margin: 2px;
+    display: flex;
+}
+
+.controlsDiv{
+    background: #48415a;
+}
+
+.titleDiv{
+    width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.titleDiv span{
+    color: #ccc;
+    display: inline-block;
+    white-space: nowrap;
+    animation: scroll 7s linear infinite;
+    font-family: 'Roboto', 'Inter', 'Poppins', 'Montserrat', 'Arial', sans-serif;
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(10%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.buttonsDiv{
+    display: flex;
+}
+
+.playImg{
+    cursor: pointer;
+    filter: invert(27%) sepia(40%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%) !important;
+}
+
+.buttonsDiv{
+    align-items: center;
+}
+
+.buttonsDiv img{
+    height: 20px;
+    aspect-ratio: 1;
+    margin: 0 5px;
+    cursor: pointer;
+    filter: invert(27%) brightness(250%);
+}
+
+.buttonsDiv span{
+    font-size: 15px;
+    width: 40px;
+    color: #e06656;
+    font-family: 'Inter', 'Poppins', 'Montserrat', 'Arial', sans-serif;
+    font-weight: bold;
+    margin: 0 2.5px;
+    text-align: end;
+}
+
+.buttonsDiv img:hover{
+    filter: invert(27%) brightness(300%);
+    transform: translateY(-1px);
+    transition: all;
+}
+
+.playImg:hover{
+    filter: invert(27%) sepia(55%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%) !important;
+    transform: translateY(-1px);
+    transition: all;
+}
+
+.timelineDiv{
+    margin-top: 3px;
+}
+
+.timelineDiv input{
+    width: 180px;
+    margin: 0 10px;
+}

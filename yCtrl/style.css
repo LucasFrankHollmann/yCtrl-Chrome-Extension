@@ -53,9 +53,15 @@ body{
 .buttonsDiv img{
     height: 20px;
     aspect-ratio: 1;
-    margin: 0 5px;
+    margin: 0 3px;
     cursor: pointer;
     filter: invert(27%) brightness(250%);
+}
+
+.buttonsDiv div{
+    cursor: pointer;
+    color: #ccc;
+    margin-left: 9.5px;
 }
 
 .buttonsDiv span{
@@ -64,7 +70,7 @@ body{
     color: #e06656;
     font-family: 'Inter', 'Poppins', 'Montserrat', 'Arial', sans-serif;
     font-weight: bold;
-    margin: 0 2.5px;
+    margin: 0 0px;
     text-align: end;
 }
 

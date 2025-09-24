@@ -40,6 +40,9 @@ function createTabItem(tab){
     let titleDiv = document.createElement("div");
     titleDiv.classList.add("titleDiv");
     let titleSpan = document.createElement("span");
+    let closeSpan = document.createElement("div");
+    closeSpan.classList.add("closeSpan");
+    closeSpan.textContent = "X";
     let buttonsDiv = document.createElement("div");
     buttonsDiv.classList.add("buttonsDiv");
     let nextImg = document.createElement("img");
@@ -58,6 +61,7 @@ function createTabItem(tab){
     buttonsDiv.appendChild(goForthImg);
     buttonsDiv.appendChild(nextImg);
     buttonsDiv.appendChild(timeSpan);
+    buttonsDiv.appendChild(closeSpan);
     prevImg.style.transform = "rotate(180deg)";
     goBackImg.style.transform = "rotate(180deg)";
     let timelineDiv = document.createElement("div");
@@ -80,6 +84,7 @@ function createTabItem(tab){
     nextImg.addEventListener("click", (e) => {next(e, tab)});
     goBackImg.addEventListener("click", (e) => {goBack(e, tab, timelineSlider, timeSpan, playImg)});
     goForthImg.addEventListener("click", (e) => {goForth(e, tab, timelineSlider, timeSpan, playImg)});
+    closeSpan.addEventListener("click", (e) => {close(e, tab)});
     timelineSlider.addEventListener("change", (e) => {changeSlider(e, tab, timeSpan)});
 
     setSliderValues(tab, timelineSlider, timeSpan, playImg, titleSpan);
@@ -162,6 +167,10 @@ function goForth(e, tab, timelineSlider, timeSpan, playImg){
     setSliderValues(tab, timelineSlider, timeSpan, playImg);
 }
 
+function close(e, tab){
+    chrome.tabs.remove(tab.id);
+}
+
 function changeSlider(e, tab, timeSpan){
     runScript(tab, 
         (val) => {
@@ -192,6 +201,10 @@ function runScript(tab, gather, consume, argus){
 }
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if(changeInfo.title)
-    createTabList();
+    if(changeInfo.title)
+        createTabList();
+});
+
+chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
+  createTabList();
 });

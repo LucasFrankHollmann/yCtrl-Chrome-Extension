@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "yCtrl",
+  "version": "1.0",
+  "description": "Controller for Youtube.",
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icons/icon.png"
+  },
+  "permissions": [
+    "tabs", "scripting"
+  ],
+  "host_permissions": [
+    "https://www.youtube.com/*"
+  ]
+}

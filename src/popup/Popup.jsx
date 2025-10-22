@@ -7,8 +7,9 @@ const Popup = () => {
   useEffect(() => {
     chrome.tabs.query({}, (tabs) => setTabs(tabs.filter(x => x.url.includes("www.youtube.com"))));
     chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-    if(changeInfo.title)
-        chrome.tabs.query({}, (tabs) => setTabs(tabs.filter(x => x.url.includes("www.youtube.com"))));
+      if(changeInfo.title){
+          chrome.tabs.query({}, (tabs) => setTabs(tabs.filter(x => x.url.includes("www.youtube.com"))));
+      }
     });
     chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
       chrome.tabs.query({}, (tabs) => setTabs(tabs.filter(x => x.url.includes("www.youtube.com"))));

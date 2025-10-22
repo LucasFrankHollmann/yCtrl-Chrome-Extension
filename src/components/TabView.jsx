@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import '../styles/TabView.css'
 import ForwardIcon from '../assets/forward-solid-full.svg';
 import ForwardStepIcon from '../assets/forward-step-solid-full.svg';
@@ -37,6 +37,8 @@ export default function TabView({ tab }) {
     const [maxTime, setMaxTime] = useState(0);
     const [title, setTitle] = useState("");
     const [visible, setVisible] = useState(true);
+    const [previewInterval, setPreviewInterval] = useState(null);
+    const canvasRef = useRef(null);
 
     useEffect(() => {
         setTitle(tab.title);
@@ -70,7 +72,40 @@ export default function TabView({ tab }) {
     }
 
     function clickPreview(e){
+        let isShowing = !isShowingPreview;
         setIsShowingPreview(!isShowingPreview);
+
+        if(previewInterval != null && !isShowing)
+            clearInterval(previewInterval);
+        else{
+            let interval = setInterval(() => {
+                runScript(tab, 
+                () => {
+                    const video = document.getElementsByTagName("video")[0];
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 300;
+                    canvas.height = video.videoHeight * 300/video.videoWidth;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    return canvas.toDataURL('image/png');
+                },
+                (url) => {
+                    const canvas = canvasRef.current;
+                    if (!canvas) return;
+
+                    const ctx = canvas.getContext("2d");
+                    const img = new Image();
+                    img.src = url;
+                    img.onload = () => {
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    };
+                });
+            }, 100);
+            setPreviewInterval(interval);
+        }
     }
     function clickPrevious(e){
         runScript(tab, 
@@ -110,7 +145,6 @@ export default function TabView({ tab }) {
         () => {
             const video = document.getElementsByTagName("video")[0];
             video.currentTime += 15;
-            console.log("a")
         },
         () => {});
         setTimeInfo();
@@ -156,7 +190,7 @@ export default function TabView({ tab }) {
             {
                 isShowingPreview &&
                 <div>
-                    <canvas></canvas>
+                    <canvas ref={canvasRef}></canvas>
                 </div>
             }
             <div class="controlls-view">

@@ -114,10 +114,16 @@ export default function TabView({ tab }) {
         },
         () => {});
         const intervalo = setInterval(() => {
-            if(tab.title != title){
-                setTitle(tab.title);
-                clearInterval(intervalo);
-            }
+            chrome.tabs.get(tab.id, (tab) => {
+                if (chrome.runtime.lastError) {
+                    console.error(chrome.runtime.lastError);
+                    return;
+                }
+                if(tab.title != title){
+                    setTitle(tab.title);
+                    clearInterval(intervalo);
+                }
+            });
         }, 500);
     }
     function clickGoBack(e){
@@ -156,10 +162,16 @@ export default function TabView({ tab }) {
         },
         () => {});
         const intervalo = setInterval(() => {
-            if(tab.title != title){
-                setTitle(tab.title);
-                clearInterval(intervalo);
-            }
+            chrome.tabs.get(tab.id, (tab) => {
+                if (chrome.runtime.lastError) {
+                    console.error(chrome.runtime.lastError);
+                    return;
+                }
+                if(tab.title != title){
+                    setTitle(tab.title);
+                    clearInterval(intervalo);
+                }
+            });
         }, 500);
     }
     function clickClose(e){

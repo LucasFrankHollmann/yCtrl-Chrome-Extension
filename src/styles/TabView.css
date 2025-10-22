@@ -1,0 +1,149 @@
+.tab-view{
+    width: 300px;
+    background-color: #2B243B;
+    margin: 4px 0;
+}
+
+.title-view{
+    margin: 2px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.title-span{
+    text-align: start;
+    color: beige;
+    font-family: 'Roboto', 'Inter', 'Poppins', 'Montserrat', 'Arial', sans-serif;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 270px;
+}
+
+.x-span{
+    text-align: start;
+    color: beige;
+    font-family: 'Roboto', 'Inter', 'Poppins', 'Montserrat', 'Arial', sans-serif;
+    font-size: medium;
+    white-space: nowrap;
+    overflow: hidden;
+    margin-right: 7px;
+    color: #ff1a1a;
+    cursor: pointer;
+}
+
+
+.controlls-view{
+    display: flex;
+    padding: 2px;
+    margin-left: 3px;
+}
+
+.controlls-btn, .controlls-btn-play{
+    width: 20px;
+    margin-right: 5px;
+    background-color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 0;
+}
+.controlls-btn-preview{
+    width: 16px;
+    margin-right: 2px;
+    background-color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.controlls-btn-preview img{
+    filter: invert(27%) sepia(1%) saturate(540%) hue-rotate(346deg) brightness(200%) contrast(95%);
+}
+.controlls-btn img{
+    filter: invert(27%) sepia(1%) saturate(740%) hue-rotate(346deg) brightness(300%) contrast(95%);
+}
+.controlls-btn-play img{
+    filter: invert(27%) sepia(79%) saturate(4740%) hue-rotate(346deg) brightness(90%) contrast(95%);
+}
+
+.controlls-btn-play:hover{
+    filter: brightness(120%);
+    transform: translateY(-1px);
+}
+.controlls-btn:hover{
+    filter: brightness(700%);
+    transform: translateY(-1px);
+}
+.controlls-btn-preview:hover{
+    filter: brightness(700%);
+    transform: translateY(-1px);
+}
+
+
+.controlls-timer{
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    margin-right: 3px;
+    flex: 1;
+}
+
+.controlls-time-span1{
+    color:rgb(252, 81, 81);
+}
+
+.controlls-time-span1-2{
+    color:rgba(250, 187, 168, 0.589);
+    margin: 0 2px;
+}
+
+.controlls-time-span2{
+    color:rgba(250, 187, 168, 0.589);
+}
+
+.slider-view{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 5px 0;
+}
+
+.slider-input{
+    width: 98%;
+}
+
+input[type="range"] {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+}
+
+input[type="range"]::-webkit-slider-runnable-track{
+  height: 6px;
+  background: #615c50;
+  border-radius: 3px;
+}
+
+input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance: none;
+  height: 10px;
+  width: 18px;
+  border-radius: 30%;
+  background: #cc2222;
+  cursor: pointer;
+  margin-top: -2px;
+}
+
+.rotated {
+  transform: rotate(180deg);
+}

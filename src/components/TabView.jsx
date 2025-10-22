@@ -1,0 +1,166 @@
+import React, { useState, useEffect } from 'react';
+import '../styles/TabView.css'
+import ForwardIcon from '../assets/forward-solid-full.svg';
+import ForwardStepIcon from '../assets/forward-step-solid-full.svg';
+import PauseIcon from '../assets/pause-solid-full.svg';
+import PlayIcon from '../assets/play-solid-full.svg';
+import EyeIcon from '../assets/eye-solid-full.svg';
+
+function runScript(tab, gather, consume, argus){
+    chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            func: gather,
+            args: argus
+        },
+        (results) => {
+            consume(results[0].result);
+        }
+    );
+}
+
+function formatTime(time){
+    const hours = parseInt(time/3600);
+    const minutes = parseInt(time/60 - hours*60);
+    const seconds = parseInt(time - hours*3600 - minutes*60);
+
+    const returnSeconds = seconds < 10 ? '0' + seconds : '' + seconds;
+    const returnMinutes = (minutes < 10 ? '0' + minutes : '' + minutes) + ':';
+    const returnHours = hours > 0 ? hours + ':': '';
+
+    return returnHours + returnMinutes + returnSeconds;
+}
+
+export default function TabView({ tab }) {
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [isShowingPreview, setIsShowingPreview] = useState(false);
+    const [currentTime, setCurrentTime] = useState(0);
+    const [maxTime, setMaxTime] = useState(0);
+    const [title, setTitle] = useState("");
+
+    useEffect(() => {
+        setTitle(tab.title);
+        setTimeInfo();
+        setInterval(() => {
+            setTimeInfo();
+        }, 1000);
+    }, []);
+
+    function setTimeInfo(){
+        runScript(tab, 
+        () => {
+            const videos = document.getElementsByTagName("video");
+            const results = Array.from(videos).map(v => ({
+                duration: v.duration ?? 0,
+                curTime: v.currentTime,
+                paused: v.paused
+            }));
+            if(results && results.length > 0)
+                return results[0];
+        },
+        (result) => {
+            if(!result)
+                return;
+            
+            setCurrentTime(result.curTime);
+            setMaxTime(result.duration);
+            setIsPlaying(!result.paused);
+        });
+    }
+
+    function clickPreview(e){
+        setIsShowingPreview(!isShowingPreview);
+    }
+    function clickPrevious(e){
+        runScript(tab, 
+        () => {
+            document.querySelector(".ytp-prev-button").click();
+        },
+        () => {});
+        const intervalo = setInterval(() => {
+            if(tab.title != title){
+                setTitle(tab.title);
+                clearInterval(intervalo);
+            }
+        }, 500);
+    }
+    function clickGoBack(e){
+        runScript(tab, 
+        () => {
+            const video = document.getElementsByTagName("video")[0];
+            video.currentTime -= 15;
+        },
+        () => {});
+        setTimeInfo();
+    }
+    function clickPlay(e){
+        runScript(tab, 
+    () => {
+        const video = document.getElementsByTagName("video")[0];
+        video.paused ? video.play() : video.pause();
+        return video.paused;
+    },
+    (paused) => {
+        setIsPlaying(!paused);
+    });
+    }
+    function clickGoForth(e){
+        runScript(tab, 
+        () => {
+            const video = document.getElementsByTagName("video")[0];
+            video.currentTime += 15;
+        },
+        () => {});
+        setTimeInfo();
+    }
+    function clickNext(e){
+        runScript(tab, 
+        () => {
+            document.querySelector(".ytp-next-button").click();
+        },
+        () => {});
+        const intervalo = setInterval(() => {
+            if(tab.title != title){
+                setTitle(tab.title);
+                clearInterval(intervalo);
+            }
+        }, 500);
+    }
+    function clickClose(e){
+        chrome.tabs.remove(tab.id);
+    }
+
+    return (
+        <div class="tab-view">
+            <div class="title-view">
+                <button onClick={clickPreview} class="controlls-btn-preview"><img src={EyeIcon}/></button>
+                <span class="title-span">
+                    {title}
+                </span>
+                <span class="x-span" onClick={clickClose}>
+                    x
+                </span>
+            </div>
+            {
+                isShowingPreview &&
+                <div>
+                    <canvas></canvas>
+                </div>
+            }
+            <div class="controlls-view">
+                <button onClick={clickPrevious} class="controlls-btn"><img class="rotated" src={ForwardStepIcon}/></button>
+                <button onClick={clickGoBack} class="controlls-btn"><img class="rotated" src={ForwardIcon}/></button>
+                <button onClick={clickPlay} class="controlls-btn-play"><img src={(isPlaying ? PauseIcon : PlayIcon)}/></button>
+                <button onClick={clickGoForth} class="controlls-btn"><img src={ForwardIcon}/></button>
+                <button onClick={clickNext} class="controlls-btn"><img src={ForwardStepIcon}/></button>
+                <div class="controlls-timer">
+                    <span class="controlls-time-span1">{formatTime(currentTime)}</span>
+                    <span class="controlls-time-span1-2">/</span>
+                    <span class="controlls-time-span2">{formatTime(maxTime)}</span>
+                </div>
+            </div>
+            <div class="slider-view">
+                <input class="slider-input" type='range' min="0" max={maxTime} value={currentTime}></input>
+            </div>
+        </div>
+    );
+}

@@ -36,6 +36,7 @@ export default function TabView({ tab }) {
     const [currentTime, setCurrentTime] = useState(0);
     const [maxTime, setMaxTime] = useState(0);
     const [title, setTitle] = useState("");
+    const [visible, setVisible] = useState(true);
 
     useEffect(() => {
         setTitle(tab.title);
@@ -64,6 +65,7 @@ export default function TabView({ tab }) {
             setCurrentTime(result.curTime);
             setMaxTime(result.duration);
             setIsPlaying(!result.paused);
+            setVisible(result.duration != undefined);
         });
     }
 
@@ -108,6 +110,7 @@ export default function TabView({ tab }) {
         () => {
             const video = document.getElementsByTagName("video")[0];
             video.currentTime += 15;
+            console.log("a")
         },
         () => {});
         setTimeInfo();
@@ -128,12 +131,22 @@ export default function TabView({ tab }) {
     function clickClose(e){
         chrome.tabs.remove(tab.id);
     }
+    function changeSlider(e){
+        setCurrentTime(Number(e.target.value));
+        runScript(tab, 
+        (sliderTime) => {
+            const video = document.getElementsByTagName("video")[0];
+            video.currentTime = sliderTime;
+        },
+        () => {}, [Number(e.target.value)]);
+        setTimeInfo();
+    }
 
-    return (
+    return visible && (
         <div class="tab-view">
             <div class="title-view">
                 <button onClick={clickPreview} class="controlls-btn-preview"><img src={EyeIcon}/></button>
-                <span class="title-span">
+                <span class="title-span" title={title}>
                     {title}
                 </span>
                 <span class="x-span" onClick={clickClose}>
@@ -159,7 +172,7 @@ export default function TabView({ tab }) {
                 </div>
             </div>
             <div class="slider-view">
-                <input class="slider-input" type='range' min="0" max={maxTime} value={currentTime}></input>
+                <input class="slider-input" type='range' min="0" max={maxTime} value={currentTime} onChange={changeSlider}></input>
             </div>
         </div>
     );

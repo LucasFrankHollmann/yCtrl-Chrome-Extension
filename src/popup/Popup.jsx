@@ -1,24 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import './Popup.css';
 import TabView from '../components/TabView';
+import MusicTabView from '../components/MusicTabView';
 
 const Popup = () => {
   const [tabs, setTabs] = useState([]);
+  function resetTabs(){
+    setTabs([]);
+    let interval = setInterval(() => {
+        chrome.tabs.query({}, (chromeTabs) => setTabs(chromeTabs.filter(x => x.url.includes("youtube.com"))));
+      }, 100);
+      setTimeout(() => {
+        clearInterval(interval);
+      }, 2000);
+  }
   useEffect(() => {
-    chrome.tabs.query({}, (tabs) => setTabs(tabs.filter(x => x.url.includes("www.youtube.com"))));
+    chrome.tabs.query({}, (chromeTabs) => setTabs(chromeTabs.filter(x => x.url.includes("youtube.com"))));
     chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-      if(changeInfo.title){
-          chrome.tabs.query({}, (tabs) => setTabs(tabs.filter(x => x.url.includes("www.youtube.com"))));
-      }
+      resetTabs();
     });
     chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
-      chrome.tabs.query({}, (tabs) => setTabs(tabs.filter(x => x.url.includes("www.youtube.com"))));
+      resetTabs();
     });
   }, []);
-
   return (
     <div class="all-tabs-view">{
-      tabs.map((tab, idx) => (<TabView tab={tab}/>))
+      tabs.map((tab, idx) => (tab.url.includes('music') ? (<MusicTabView tab={tab}/>) : (<TabView tab={tab}/>)))
     }</div>
   );
 };

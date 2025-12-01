@@ -4,7 +4,6 @@ import ForwardIcon from '../assets/forward-solid-full.svg';
 import ForwardStepIcon from '../assets/forward-step-solid-full.svg';
 import PauseIcon from '../assets/pause-solid-full.svg';
 import PlayIcon from '../assets/play-solid-full.svg';
-import EyeIcon from '../assets/eye-solid-full.svg';
 
 function runScript(tab, gather, consume, argus){
     chrome.scripting.executeScript({
@@ -110,7 +109,8 @@ export default function TabView({ tab }) {
     function clickPrevious(e){
         runScript(tab, 
         () => {
-            document.querySelector(".ytp-prev-button").click();
+            let div = document.querySelector(".ytmusic-player-bar.previous-button");
+            div.children[0].click();
         },
         () => {});
         const intervalo = setInterval(() => {
@@ -158,7 +158,8 @@ export default function TabView({ tab }) {
     function clickNext(e){
         runScript(tab, 
         () => {
-            document.querySelector(".ytp-next-button").click();
+            let div = document.querySelector(".ytmusic-player-bar.next-button");
+            div.children[0].click();
         },
         () => {});
         const intervalo = setInterval(() => {
@@ -191,20 +192,10 @@ export default function TabView({ tab }) {
     return visible && (
         <div class="tab-view">
             <div class="title-view">
-                <button onClick={clickPreview} class="controlls-btn-preview"><img src={EyeIcon}/></button>
                 <span class="title-span" title={title}>
                     {title}
                 </span>
-                <span class="x-span" onClick={clickClose}>
-                    x
-                </span>
             </div>
-            {
-                isShowingPreview &&
-                <div>
-                    <canvas ref={canvasRef}></canvas>
-                </div>
-            }
             <div class="controlls-view">
                 <button onClick={clickPrevious} class="controlls-btn"><img class="rotated" src={ForwardStepIcon}/></button>
                 <button onClick={clickGoBack} class="controlls-btn"><img class="rotated" src={ForwardIcon}/></button>

@@ -17,7 +17,8 @@ const Popup = () => {
   useEffect(() => {
     chrome.tabs.query({}, (chromeTabs) => setTabs(chromeTabs.filter(x => x.url.includes("youtube.com"))));
     chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-      resetTabs();
+      if(changeInfo.title)
+        resetTabs();
     });
     chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
       resetTabs();

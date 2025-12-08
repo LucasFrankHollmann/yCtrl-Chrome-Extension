@@ -201,6 +201,7 @@ function runScript(tab, gather, consume, argus){
 }
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    console.log(tab.title)
     if(changeInfo.title)
         createTabList();
 });

@@ -147,3 +147,40 @@ input[type="range"]::-webkit-slider-thumb{
 .rotated {
   transform: rotate(180deg);
 }
+
+.controlls-speed{
+    display: flex;
+    margin: auto;
+}
+
+.controlls-speed input{
+    width: 18px;
+    background: transparent;
+    color: white;
+    outline: none;
+    appearance: none;
+    -moz-appearance: textfield;
+    text-align: center;    
+    border: 0px solid black;
+}
+
+.controlls-speed input::-webkit-inner-spin-button,
+.controlls-speed input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.controlls-speed button{
+    aspect-ratio: 1;
+    width: 20px;
+    padding: 0;
+    border: 0px solid black;
+    border-radius: 25%;
+    background-color: transparent;
+    color: brown;
+    cursor: pointer;
+}
+
+.controlls-speed button:hover{
+    color: crimson;
+}

@@ -34,11 +34,13 @@ export default function TabView({ tab }) {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isShowingPreview, setIsShowingPreview] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
+    const [playSpeed, setPlaySpeed] = useState(1);
     const [maxTime, setMaxTime] = useState(0);
     const [title, setTitle] = useState("");
     const [visible, setVisible] = useState(true);
     const [previewInterval, setPreviewInterval] = useState(null);
     const canvasRef = useRef(null);
+    const speedInputRef = useRef(null);
 
     useEffect(() => {
         setTitle(tab.title);
@@ -55,7 +57,8 @@ export default function TabView({ tab }) {
             const results = Array.from(videos).map(v => ({
                 duration: v.duration ?? 0,
                 curTime: v.currentTime,
-                paused: v.paused
+                paused: v.paused,
+                playbackRate: v.playbackRate
             }));
             if(results && results.length > 0)
                 return results[0];
@@ -68,6 +71,8 @@ export default function TabView({ tab }) {
             setMaxTime(result.duration);
             setIsPlaying(!result.paused);
             setVisible(result.duration != undefined);
+            if(speedInputRef.current)
+                speedInputRef.current.value = result.playbackRate;
         });
     }
 
@@ -187,6 +192,21 @@ export default function TabView({ tab }) {
         () => {}, [Number(e.target.value)]);
         setTimeInfo();
     }
+    function changeSpeed(e){
+        let formatted = speedInputRef.current.value.replace(/(\.\d).*/,'$1')
+        if(!formatted.startsWith('0.'))
+            formatted = formatted.replace(/^0+/, "");
+        if(formatted.length == 0)
+            formatted = '0';
+        if(formatted != speedInputRef.current.value)
+            speedInputRef.current.value = formatted;
+        runScript(tab, 
+        (speedInputRef) => {
+            const video = document.getElementsByTagName("video")[0];
+            video.playbackRate = speedInputRef;
+        },
+        () => {}, [Number(speedInputRef.current.value)]);
+    }
 
     return visible && (
         <div class="tab-view">
@@ -211,6 +231,23 @@ export default function TabView({ tab }) {
                 <button onClick={clickPlay} class="controlls-btn-play"><img src={(isPlaying ? PauseIcon : PlayIcon)}/></button>
                 <button onClick={clickGoForth} class="controlls-btn"><img src={ForwardIcon}/></button>
                 <button onClick={clickNext} class="controlls-btn"><img src={ForwardStepIcon}/></button>
+                <div class="controlls-speed">
+                    <button onClick={(e) => {
+                        if(e.shiftKey || e.ctrlKey)
+                            speedInputRef.current.value = (speedInputRef.current.value <= 1 ? 0 : (parseFloat(speedInputRef.current.value) - 1));
+                        else
+                            speedInputRef.current.value = (speedInputRef.current.value <= 0.1 ? 0 : (parseFloat(speedInputRef.current.value) - 0.05));
+                        changeSpeed();
+                    }}>▼</button>
+                    <input ref={speedInputRef} type="text" disabled defaultValue="0" onChange={changeSpeed}></input>
+                    <button onClick={(e) => {
+                        if(e.shiftKey || e.ctrlKey)
+                            speedInputRef.current.value = parseFloat(speedInputRef.current.value) + 1;
+                        else
+                            speedInputRef.current.value = parseFloat(speedInputRef.current.value) + 0.15;
+                        changeSpeed();
+                    }}>▲</button>
+                </div>
                 <div class="controlls-timer">
                     <span class="controlls-time-span1">{formatTime(currentTime)}</span>
                     <span class="controlls-time-span1-2">/</span>

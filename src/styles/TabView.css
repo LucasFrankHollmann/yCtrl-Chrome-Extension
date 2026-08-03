@@ -55,7 +55,7 @@
 /* Icon buttons ------------------------------------------------------------- */
 
 .controlls-btn, .controlls-btn-play, .controlls-btn-preview,
-.controlls-btn-volume, .controlls-btn-speed{
+.controlls-btn-volume, .controlls-btn-speed, .controlls-btn-pip{
     display: flex;
     align-items: center;
     justify-content: center;
@@ -69,18 +69,26 @@
 }
 
 .controlls-btn:hover, .controlls-btn-play:hover, .controlls-btn-preview:hover,
-.controlls-btn-volume:hover, .controlls-btn-speed:hover{
+.controlls-btn-volume:hover, .controlls-btn-speed:hover, .controlls-btn-pip:hover{
     opacity: 1;
 }
 
 .controlls-btn:active, .controlls-btn-play:active, .controlls-btn-preview:active,
-.controlls-btn-volume:active, .controlls-btn-speed:active{
+.controlls-btn-volume:active, .controlls-btn-speed:active, .controlls-btn-pip:active{
     transform: scale(.9);
 }
 
 .controlls-btn img, .controlls-btn-preview img,
-.controlls-btn-volume img, .controlls-btn-speed img{
+.controlls-btn-volume img, .controlls-btn-speed img, .controlls-btn-pip img{
     filter: var(--icon-filter);
+}
+
+.controlls-btn-pip.active{
+    opacity: 1;
+}
+
+.controlls-btn-pip.active img{
+    filter: var(--icon-filter-accent);
 }
 
 .controlls-btn{
@@ -104,7 +112,8 @@
     filter: var(--icon-filter-accent);
 }
 
-.controlls-btn-preview img, .controlls-btn-volume img, .controlls-btn-speed img{
+.controlls-btn-preview img, .controlls-btn-volume img,
+.controlls-btn-speed img, .controlls-btn-pip img{
     width: 15px;
 }
 

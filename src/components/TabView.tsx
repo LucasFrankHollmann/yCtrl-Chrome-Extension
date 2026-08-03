@@ -6,6 +6,7 @@ import ForwardStepIcon from '../assets/forward-step-solid-full.svg';
 import PauseIcon from '../assets/pause-solid-full.svg';
 import PlayIcon from '../assets/play-solid-full.svg';
 import EyeIcon from '../assets/eye-solid-full.svg';
+import PipIcon from '../assets/pip-solid-full.svg';
 import VolumeControl from './VolumeControl';
 import SpeedControl, { MIN_SPEED, MAX_SPEED } from './SpeedControl';
 import { applyVolumeInPage } from '../lib/pageAudio';
@@ -27,6 +28,7 @@ export default function TabView({ tab }: TabViewProps) {
     const [previewInterval, setPreviewInterval] = useState<ReturnType<typeof setInterval> | null>(null);
     const [volume, setVolume] = useState(1);
     const [muted, setMuted] = useState(false);
+    const [isPip, setIsPip] = useState(false);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const isAdjustingVolumeRef = useRef(false);
     const isAdjustingSpeedRef = useRef(false);
@@ -53,7 +55,8 @@ export default function TabView({ tab }: TabViewProps) {
                 paused: v.paused,
                 playbackRate: v.playbackRate,
                 volume: window.__yctrlGain ? window.__yctrlGain.gain.value : v.volume,
-                muted: v.muted
+                muted: v.muted,
+                pip: document.pictureInPictureElement === v
             }));
             if(results && results.length > 0)
                 return results[0];
@@ -73,6 +76,7 @@ export default function TabView({ tab }: TabViewProps) {
             }
             if(!isAdjustingSpeedRef.current)
                 setPlaySpeed(result.playbackRate);
+            setIsPip(result.pip);
         });
     }
 
@@ -111,6 +115,36 @@ export default function TabView({ tab }: TabViewProps) {
             }, 20);
             setPreviewInterval(interval);
         }
+    }
+    function clickPip(){
+        runScript(tab,
+        async () => {
+            const video = document.getElementsByTagName("video")[0];
+            if(!video)
+                return "no video in the tab";
+
+            if(document.pictureInPictureElement === video){
+                await document.exitPictureInPicture();
+                return null;
+            }
+
+            // YouTube sets this attribute on some players, and it blocks the
+            // request outright.
+            video.disablePictureInPicture = false;
+            try {
+                await video.requestPictureInPicture();
+                return null;
+            }
+            catch (err) {
+                return (err as Error).message;
+            }
+        },
+        (error) => {
+            // Most likely cause is the missing user activation described below.
+            if(error)
+                console.error("yCtrl: picture-in-picture failed -", error);
+            setTimeInfo();
+        });
     }
     function clickPrevious(){
         runScript(tab,
@@ -219,7 +253,9 @@ export default function TabView({ tab }: TabViewProps) {
     return visible ? (
         <div className="tab-view">
             <div className="title-view">
-                <button onClick={clickPreview} className="controlls-btn-preview"><img src={EyeIcon}/></button>
+                <button onClick={clickPreview} className="controlls-btn-preview" title="Toggle preview"><img src={EyeIcon}/></button>
+                <button onClick={clickPip} className={"controlls-btn-pip" + (isPip ? " active" : "")}
+                    title={isPip ? "Exit picture-in-picture" : "Picture-in-picture"}><img src={PipIcon}/></button>
                 <span className="title-span" title={title}>
                     {title}
                 </span>

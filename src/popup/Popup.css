@@ -1,4 +1,61 @@
+:root{
+    --bg: #1b1625;
+    --card: #251e35;
+    --border: rgba(255, 255, 255, 0.07);
+    --text: #ece6db;
+    --text-dim: rgba(250, 187, 168, 0.55);
+    --accent: #e03a3a;
+    --accent-dim: #8f2626;
+    --accent-soft: rgba(224, 58, 58, 0.25);
+    --track: #3b3452;
+    --radius: 8px;
+    --font: 'Roboto', 'Inter', 'Poppins', 'Montserrat', 'Arial', sans-serif;
+
+    /* The icons are black SVGs loaded as <img>, so they are recoloured with
+       filters instead of fill/currentColor. */
+    --icon-filter: invert(27%) sepia(1%) saturate(740%) hue-rotate(346deg) brightness(300%) contrast(95%);
+    --icon-filter-accent: invert(27%) sepia(79%) saturate(4740%) hue-rotate(346deg) brightness(90%) contrast(95%);
+}
+
 body{
-    background-color: #1b1625;
-    margin: 0px;
+    width: 320px;
+    margin: 0;
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 12px;
+    -webkit-font-smoothing: antialiased;
+}
+
+.all-tabs-view{
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 6px;
+    max-height: 560px;
+    overflow-y: auto;
+}
+
+.all-tabs-view::-webkit-scrollbar{
+    width: 8px;
+}
+
+.all-tabs-view::-webkit-scrollbar-track{
+    background: transparent;
+}
+
+.all-tabs-view::-webkit-scrollbar-thumb{
+    background: var(--track);
+    border-radius: 4px;
+}
+
+.all-tabs-view::-webkit-scrollbar-thumb:hover{
+    background: var(--accent-dim);
+}
+
+.empty-view{
+    padding: 28px 12px;
+    text-align: center;
+    color: var(--text-dim);
+    line-height: 1.5;
 }

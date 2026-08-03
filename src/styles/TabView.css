@@ -1,186 +1,247 @@
 .tab-view{
-    width: 300px;
-    background-color: #2B243B;
-    margin: 4px 0;
+    background-color: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 6px 8px 8px;
 }
 
+/* Title row ---------------------------------------------------------------- */
+
 .title-view{
-    margin: 2px;
-    width: 100%;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 6px;
 }
 
 .title-span{
-    text-align: start;
-    color: beige;
-    font-family: 'Roboto', 'Inter', 'Poppins', 'Montserrat', 'Arial', sans-serif;
+    flex: 1;
+    min-width: 0;
+    color: var(--text);
+    font-weight: 500;
     white-space: nowrap;
     overflow: hidden;
-    width: 270px;
+    text-overflow: ellipsis;
 }
 
 .x-span{
-    text-align: start;
-    color: beige;
-    font-family: 'Roboto', 'Inter', 'Poppins', 'Montserrat', 'Arial', sans-serif;
-    font-size: medium;
-    white-space: nowrap;
-    overflow: hidden;
-    margin-right: 7px;
-    color: #ff1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    color: var(--text-dim);
+    line-height: 1;
     cursor: pointer;
+    transition: background-color .15s ease, color .15s ease;
 }
 
+.x-span:hover{
+    background-color: var(--accent);
+    color: #fff;
+}
+
+.preview-view{
+    padding: 6px 0 2px;
+}
+
+.preview-view canvas{
+    display: block;
+    width: 100%;
+    border-radius: 6px;
+}
+
+/* Icon buttons ------------------------------------------------------------- */
+
+.controlls-btn, .controlls-btn-play, .controlls-btn-preview,
+.controlls-btn-volume, .controlls-btn-speed{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+    opacity: .8;
+    transition: opacity .15s ease, transform .12s ease;
+}
+
+.controlls-btn:hover, .controlls-btn-play:hover, .controlls-btn-preview:hover,
+.controlls-btn-volume:hover, .controlls-btn-speed:hover{
+    opacity: 1;
+}
+
+.controlls-btn:active, .controlls-btn-play:active, .controlls-btn-preview:active,
+.controlls-btn-volume:active, .controlls-btn-speed:active{
+    transform: scale(.9);
+}
+
+.controlls-btn img, .controlls-btn-preview img,
+.controlls-btn-volume img, .controlls-btn-speed img{
+    filter: var(--icon-filter);
+}
+
+.controlls-btn{
+    width: 22px;
+    height: 22px;
+}
+
+.controlls-btn img{
+    width: 15px;
+}
+
+.controlls-btn-play{
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background-color: var(--accent-soft);
+}
+
+.controlls-btn-play img{
+    width: 13px;
+    filter: var(--icon-filter-accent);
+}
+
+.controlls-btn-preview img, .controlls-btn-volume img, .controlls-btn-speed img{
+    width: 15px;
+}
+
+.rotated{
+    transform: rotate(180deg);
+}
+
+/* Transport row ------------------------------------------------------------ */
 
 .controlls-view{
     display: flex;
-    padding: 2px;
-    margin-left: 3px;
-}
-
-.controlls-btn, .controlls-btn-play{
-    width: 20px;
-    margin-right: 5px;
-    background-color: transparent;
-    display: flex;
     align-items: center;
-    justify-content: center;
-    border: none;
-    outline: none;
-    cursor: pointer;
-    padding: 0;
+    gap: 3px;
+    padding: 4px 0 0;
 }
-.controlls-btn-preview{
-    width: 16px;
-    margin-right: 2px;
-    background-color: transparent;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    outline: none;
-    cursor: pointer;
-    padding: 0;
-}
-
-.controlls-btn-preview img{
-    filter: invert(27%) sepia(1%) saturate(540%) hue-rotate(346deg) brightness(200%) contrast(95%);
-}
-.controlls-btn img{
-    filter: invert(27%) sepia(1%) saturate(740%) hue-rotate(346deg) brightness(300%) contrast(95%);
-}
-.controlls-btn-play img{
-    filter: invert(27%) sepia(79%) saturate(4740%) hue-rotate(346deg) brightness(90%) contrast(95%);
-}
-
-.controlls-btn-play:hover{
-    filter: brightness(120%);
-    transform: translateY(-1px);
-}
-.controlls-btn:hover{
-    filter: brightness(700%);
-    transform: translateY(-1px);
-}
-.controlls-btn-preview:hover{
-    filter: brightness(700%);
-    transform: translateY(-1px);
-}
-
 
 .controlls-timer{
     display: flex;
     align-items: center;
     justify-content: end;
-    margin-right: 3px;
     flex: 1;
+    font-size: 11px;
+    /* Equal-width digits, so the row does not jitter as the time ticks. */
+    font-variant-numeric: tabular-nums;
 }
 
 .controlls-time-span1{
-    color:rgb(252, 81, 81);
+    color: var(--accent);
+}
+
+.controlls-time-span1-2, .controlls-time-span2{
+    color: var(--text-dim);
 }
 
 .controlls-time-span1-2{
-    color:rgba(250, 187, 168, 0.589);
     margin: 0 2px;
 }
 
-.controlls-time-span2{
-    color:rgba(250, 187, 168, 0.589);
-}
+/* Sliders ------------------------------------------------------------------ */
 
 .slider-view{
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: 100%;
-    padding: 5px 0;
+    padding: 6px 0 2px;
 }
 
-.slider-input{
-    width: 98%;
+.slider-input, .volume-input, .speed-input{
+    flex: 1;
+    min-width: 0;
 }
 
-input[type="range"] {
-  appearance: none;
-  -webkit-appearance: none;
-  background: transparent;
-}
-
-input[type="range"]::-webkit-slider-runnable-track{
-  height: 6px;
-  background: #615c50;
-  border-radius: 3px;
-}
-
-input[type="range"]::-webkit-slider-thumb{
-  -webkit-appearance: none;
-  height: 10px;
-  width: 18px;
-  border-radius: 30%;
-  background: #cc2222;
-  cursor: pointer;
-  margin-top: -2px;
-}
-
-.rotated {
-  transform: rotate(180deg);
-}
-
-.controlls-speed{
-    display: flex;
-    margin: auto;
-}
-
-.controlls-speed input{
-    width: 18px;
-    background: transparent;
-    color: white;
-    outline: none;
+input[type="range"]{
     appearance: none;
-    -moz-appearance: textfield;
-    text-align: center;    
-    border: 0px solid black;
-}
-
-.controlls-speed input::-webkit-inner-spin-button,
-.controlls-speed input::-webkit-outer-spin-button {
     -webkit-appearance: none;
+    background: transparent;
+    height: 14px;
     margin: 0;
-}
-
-.controlls-speed button{
-    aspect-ratio: 1;
-    width: 20px;
-    padding: 0;
-    border: 0px solid black;
-    border-radius: 25%;
-    background-color: transparent;
-    color: brown;
     cursor: pointer;
 }
 
-.controlls-speed button:hover{
-    color: crimson;
+input[type="range"]::-webkit-slider-runnable-track{
+    height: 5px;
+    border-radius: 3px;
+    /* --fill is set inline by each slider so the filled part follows the value. */
+    background: linear-gradient(to right,
+        var(--accent-dim) var(--fill, 0%), var(--track) var(--fill, 0%));
+}
+
+input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance: none;
+    height: 11px;
+    width: 11px;
+    margin-top: -3px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    transition: transform .12s ease;
+}
+
+input[type="range"]:hover::-webkit-slider-thumb{
+    transform: scale(1.2);
+}
+
+.tab-view button:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+}
+
+input[type="range"]:focus-visible{
+    outline: none;
+}
+
+input[type="range"]:focus-visible::-webkit-slider-thumb{
+    box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+/* Volume and speed rows ---------------------------------------------------- */
+
+.volume-view, .speed-view{
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding-top: 4px;
+}
+
+.volume-span, .speed-span{
+    width: 34px;
+    flex-shrink: 0;
+    color: var(--text-dim);
+    font-size: 11px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+}
+
+.volume-span:hover, .speed-span:hover{
+    color: var(--text);
+}
+
+/* Above 100% the audio is going through the gain node, so flag it. */
+.volume-span.boosted, .speed-span.altered{
+    color: var(--accent);
+}
+
+.step-btn{
+    width: 14px;
+    padding: 0;
+    border: none;
+    background-color: transparent;
+    color: var(--accent-dim);
+    font-size: 13px;
+    line-height: 1;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: color .15s ease;
+}
+
+.step-btn:hover{
+    color: var(--accent);
 }

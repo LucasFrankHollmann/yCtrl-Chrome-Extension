@@ -19,6 +19,13 @@ export default function runScript<A extends unknown[], R>(
             args: argus
         },
         (results) => {
+            // A tab Chrome has unloaded has no page to inject into, so the call
+            // fails and reports no results. Reading lastError here is also what
+            // keeps Chrome from logging it: every caller polls on a timer, so an
+            // unhandled failure would repeat every tick.
+            if(chrome.runtime.lastError || !results || results.length === 0)
+                return;
+
             // A single frame is targeted, so there is exactly one result. Chrome
             // types it as optional because a failed frame reports no value.
             consume(results[0].result as Awaited<R>);

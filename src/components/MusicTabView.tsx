@@ -19,7 +19,6 @@ export default function MusicTabView({ tab }: MusicTabViewProps) {
     const [currentTime, setCurrentTime] = useState(0);
     const [maxTime, setMaxTime] = useState(0);
     const [title, setTitle] = useState("");
-    const [visible, setVisible] = useState(true);
     const [volume, setVolume] = useState(1);
     const [muted, setMuted] = useState(false);
     const isAdjustingVolumeRef = useRef(false);
@@ -41,7 +40,10 @@ export default function MusicTabView({ tab }: MusicTabViewProps) {
         () => {
             const videos = document.getElementsByTagName("video");
             const results = Array.from(videos).map(v => ({
-                duration: v.duration ?? 0,
+                // A player that has not loaded metadata reports NaN, and a live
+                // stream reports Infinity. Both survive `??` but are flattened to
+                // null by the JSON round trip out of the tab, so normalise here.
+                duration: Number.isFinite(v.duration) ? v.duration : 0,
                 curTime: v.currentTime,
                 paused: v.paused,
                 volume: window.__yctrlGain ? window.__yctrlGain.gain.value : v.volume,
@@ -57,7 +59,6 @@ export default function MusicTabView({ tab }: MusicTabViewProps) {
             setCurrentTime(result.curTime);
             setMaxTime(result.duration);
             setIsPlaying(!result.paused);
-            setVisible(result.duration != undefined);
             // Skip while dragging, otherwise the poll snaps the slider back.
             if(!isAdjustingVolumeRef.current){
                 setVolume(result.volume);
@@ -158,7 +159,7 @@ export default function MusicTabView({ tab }: MusicTabViewProps) {
         applyVolume(volume, !muted);
     }
 
-    return visible ? (
+    return (
         <div className="tab-view">
             <div className="title-view">
                 <span className="title-span" title={title}>
@@ -191,5 +192,5 @@ export default function MusicTabView({ tab }: MusicTabViewProps) {
                 onAdjustEnd={() => isAdjustingVolumeRef.current = false}
             />
         </div>
-    ) : null;
+    );
 }

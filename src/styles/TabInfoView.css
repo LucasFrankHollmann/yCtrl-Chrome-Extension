@@ -1,0 +1,119 @@
+.tab-info-view{
+    border-radius: var(--radius);
+    padding: 6px 8px;
+}
+
+/* Dashed and dimmed, so an unloaded tab never reads as a control you can use. */
+.tab-info-view.inactive{
+    border: 1px dashed var(--border);
+    opacity: .7;
+    transition: opacity .15s ease;
+}
+
+.tab-info-view.inactive:hover{
+    opacity: 1;
+}
+
+/* The page here is running and only lacks a player, so it keeps the solid look of
+   a live card rather than being dimmed like something asleep. */
+.tab-info-view.plain{
+    background-color: var(--card);
+    border: 1px solid var(--border);
+}
+
+.tab-info-view .title-span{
+    font-weight: 400;
+}
+
+/* Reason badge ------------------------------------------------------------- */
+
+.reason-badge{
+    flex-shrink: 0;
+    padding: 1px 5px;
+    border-radius: 4px;
+    background-color: var(--track);
+    color: var(--text-dim);
+    font-size: 9px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    cursor: help;
+}
+
+/* Discarded is the lossy one, so it is the only reason flagged in the accent. */
+.reason-badge.discarded{
+    background-color: var(--accent-soft);
+    color: var(--accent);
+}
+
+/* The page is alive in these two, so they read softer than the unloaded reasons. */
+.reason-badge.not-started, .reason-badge.no-media{
+    background-color: transparent;
+    border: 1px solid var(--border);
+}
+
+/* Meta row ----------------------------------------------------------------- */
+
+.tab-info-meta{
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding-top: 3px;
+    color: var(--text-dim);
+    font-size: 10px;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Page kind, independent of reason: a watch URL is a video, the rest is browsing. */
+.tab-info-kind{
+    font-weight: 500;
+    letter-spacing: .02em;
+}
+
+.tab-info-kind.video{
+    color: var(--text);
+}
+
+/* Revive actions ----------------------------------------------------------- */
+
+.tab-info-actions{
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+}
+
+.revive-btn{
+    padding: 1px 6px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background-color: transparent;
+    color: var(--text-dim);
+    font-family: inherit;
+    font-size: 10px;
+    line-height: 1.5;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color .15s ease, border-color .15s ease;
+}
+
+.revive-btn:hover{
+    color: var(--text);
+    border-color: var(--accent-dim);
+}
+
+.revive-btn:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+}
+
+/* The play attempt is the one action that can be refused, so say so instead of
+   leaving the click looking like it did nothing. */
+.tab-info-error{
+    padding-top: 3px;
+    color: var(--accent);
+    font-size: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

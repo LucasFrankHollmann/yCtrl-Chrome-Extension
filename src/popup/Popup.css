@@ -59,3 +59,23 @@ body{
     color: var(--text-dim);
     line-height: 1.5;
 }
+
+/* Divider introducing a group of tabs with no player, below the playable ones. */
+
+.tab-group-header{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 2px 0;
+    color: var(--text-dim);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+}
+
+.tab-group-header::after{
+    content: "";
+    flex: 1;
+    height: 1px;
+    background-color: var(--border);
+}

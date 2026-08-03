@@ -7,6 +7,10 @@
     "default_popup": "popup.html",
     "default_icon": "icons/icon.png"
   },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
   "permissions": [
     "tabs", "scripting"
   ],

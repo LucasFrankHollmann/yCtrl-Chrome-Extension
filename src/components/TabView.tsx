@@ -24,7 +24,6 @@ export default function TabView({ tab }: TabViewProps) {
     const [playSpeed, setPlaySpeed] = useState(1);
     const [maxTime, setMaxTime] = useState(0);
     const [title, setTitle] = useState("");
-    const [visible, setVisible] = useState(true);
     const [previewInterval, setPreviewInterval] = useState<ReturnType<typeof setInterval> | null>(null);
     const [volume, setVolume] = useState(1);
     const [muted, setMuted] = useState(false);
@@ -50,7 +49,10 @@ export default function TabView({ tab }: TabViewProps) {
         () => {
             const videos = document.getElementsByTagName("video");
             const results = Array.from(videos).map(v => ({
-                duration: v.duration ?? 0,
+                // A player that has not loaded metadata reports NaN, and a live
+                // stream reports Infinity. Both survive `??` but are flattened to
+                // null by the JSON round trip out of the tab, so normalise here.
+                duration: Number.isFinite(v.duration) ? v.duration : 0,
                 curTime: v.currentTime,
                 paused: v.paused,
                 playbackRate: v.playbackRate,
@@ -68,7 +70,6 @@ export default function TabView({ tab }: TabViewProps) {
             setCurrentTime(result.curTime);
             setMaxTime(result.duration);
             setIsPlaying(!result.paused);
-            setVisible(result.duration != undefined);
             // Skip while dragging, otherwise the poll snaps the slider back.
             if(!isAdjustingVolumeRef.current){
                 setVolume(result.volume);
@@ -250,7 +251,7 @@ export default function TabView({ tab }: TabViewProps) {
         () => {}, [clamped]);
     }
 
-    return visible ? (
+    return (
         <div className="tab-view">
             <div className="title-view">
                 <button onClick={clickPreview} className="controlls-btn-preview" title="Toggle preview"><img src={EyeIcon}/></button>
@@ -301,5 +302,5 @@ export default function TabView({ tab }: TabViewProps) {
                 onAdjustEnd={() => isAdjustingSpeedRef.current = false}
             />
         </div>
-    ) : null;
+    );
 }

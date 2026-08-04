@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import type { MouseEvent, KeyboardEvent } from 'react';
 // The title row reuses the classes TabView defines, so both stylesheets are
 // needed even when no playable tab is on screen.
 import '../styles/TabView.css';
@@ -17,6 +18,12 @@ type TabInfoViewProps = {
      * player — it must not read as asleep, and its group header already names it.
      */
     variant?: 'inactive' | 'plain';
+    /**
+     * Makes the whole card open the videos the tab's page lists, on a screen of its own
+     * inside the popup. Given only where the card has nothing to control, so drilling in
+     * is what it can offer. The browser does not change tabs.
+     */
+    onOpen?: () => void;
 };
 
 /**
@@ -27,7 +34,7 @@ type TabInfoViewProps = {
  * drive the page from here instead was measured and does not work, because YouTube
  * will not load media into a tab that has never been shown.
  */
-export default function TabInfoView({ tab, reason, variant = 'inactive' }: TabInfoViewProps) {
+export default function TabInfoView({ tab, reason, variant = 'inactive', onOpen }: TabInfoViewProps) {
     const [error, setError] = useState<string | null>(null);
     const { label, hint } = NO_PLAYER_REASON[reason];
     const url = tabUrl(tab);
@@ -35,10 +42,20 @@ export default function TabInfoView({ tab, reason, variant = 'inactive' }: TabIn
     // A page with nothing playing has nothing to revive; it is already running.
     const canRevive = reason !== 'no-media';
 
-    function clickClose(){
+    function clickClose(event: MouseEvent){
+        // Closing must not also open the tab it just closed.
+        event.stopPropagation();
         // Closing needs no page, so it works even while the tab is unloaded.
         if(tab.id !== undefined)
             chrome.tabs.remove(tab.id);
+    }
+    function keyDownCard(event: KeyboardEvent){
+        // A div standing in for a button has to answer the keys a button would.
+        if(event.key !== 'Enter' && event.key !== ' ')
+            return;
+
+        event.preventDefault();
+        onOpen?.();
     }
     function clickWake(){
         const tabId = tab.id;
@@ -65,7 +82,14 @@ export default function TabInfoView({ tab, reason, variant = 'inactive' }: TabIn
     }
 
     return (
-        <div className={"tab-info-view " + variant}>
+        <div
+            className={"tab-info-view " + variant + (onOpen ? " clickable" : "")}
+            onClick={onOpen}
+            onKeyDown={onOpen ? keyDownCard : undefined}
+            role={onOpen ? "button" : undefined}
+            tabIndex={onOpen ? 0 : undefined}
+            title={onOpen ? "List the videos on this page" : undefined}
+        >
             <div className="title-view">
                 {
                     variant === 'inactive' &&
@@ -81,6 +105,14 @@ export default function TabInfoView({ tab, reason, variant = 'inactive' }: TabIn
                 {
                     // lastAccessed landed in Chrome 121, so older builds omit it.
                     tab.lastAccessed ? " · Last active " + formatSince(tab.lastAccessed) : ""
+                }
+                {
+                    // Not a button: the whole card already is one, and a control inside
+                    // a control is a click target that fights its own parent.
+                    onOpen &&
+                    <span className="tab-info-actions">
+                        <span className="go-hint">videos ›</span>
+                    </span>
                 }
                 {
                     canRevive &&

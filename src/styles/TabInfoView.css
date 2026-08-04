@@ -25,6 +25,35 @@
     font-weight: 400;
 }
 
+/* A card that is itself the control, opening the tab's own page inside the popup. The
+   border lifting on hover is what separates it from a card that only reports. */
+.tab-info-view.clickable{
+    cursor: pointer;
+    transition: background-color .15s ease, border-color .15s ease;
+}
+
+.tab-info-view.clickable:hover{
+    background-color: var(--track);
+    border-color: var(--accent-dim);
+}
+
+.tab-info-view.clickable:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+}
+
+/* Text, not a button: the card carries the click, so this only has to say so. */
+.go-hint{
+    color: var(--text-dim);
+    font-size: 10px;
+    white-space: nowrap;
+    transition: color .15s ease;
+}
+
+.tab-info-view.clickable:hover .go-hint{
+    color: var(--accent);
+}
+
 /* Reason badge ------------------------------------------------------------- */
 
 .reason-badge{

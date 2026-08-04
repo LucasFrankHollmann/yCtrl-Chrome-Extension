@@ -1,0 +1,263 @@
+/* The popup's second screen. It replaces the list rather than sitting over it, so it
+   owns its own scrolling and padding instead of living inside .all-tabs-view. */
+
+.tab-videos-view{
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 0 6px 6px;
+    max-height: 560px;
+    overflow-y: auto;
+}
+
+.tab-videos-view::-webkit-scrollbar{
+    width: 8px;
+}
+
+.tab-videos-view::-webkit-scrollbar-track{
+    background: transparent;
+}
+
+.tab-videos-view::-webkit-scrollbar-thumb{
+    background: var(--track);
+    border-radius: 4px;
+}
+
+.tab-videos-view::-webkit-scrollbar-thumb:hover{
+    background: var(--accent-dim);
+}
+
+/* Head --------------------------------------------------------------------- */
+
+/* Sticky and opaque: the way back and the search have to stay reachable however far
+   the list scrolls, and rows passing under them must not show through. */
+.videos-bar{
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    /* Cancels the container padding, so the bar spans the full width. */
+    margin: 0 -6px;
+    padding: 8px 6px;
+    background-color: var(--bg);
+    border-bottom: 1px solid var(--border);
+}
+
+.videos-head{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.videos-search{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding-top: 6px;
+}
+
+.search-input{
+    flex: 1;
+    min-width: 0;
+    padding: 3px 6px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background-color: var(--card);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 11px;
+}
+
+.search-input::placeholder{
+    color: var(--text-dim);
+}
+
+.search-input:focus{
+    outline: none;
+    border-color: var(--accent-dim);
+}
+
+/* In the corner, and first in the DOM, so it is also the first thing Tab reaches. */
+.back-btn{
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background-color: transparent;
+    color: var(--text-dim);
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1;
+    cursor: pointer;
+    transition: color .15s ease, border-color .15s ease, background-color .15s ease;
+}
+
+.back-btn:hover{
+    background-color: var(--track);
+    border-color: var(--accent-dim);
+    color: var(--text);
+}
+
+/* Words rather than glyphs: 'home' and 'go' read the same in every font the popup
+   might fall back to, which ⌂ and ⌕ do not. */
+.text-btn{
+    flex-shrink: 0;
+    padding: 2px 8px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background-color: transparent;
+    color: var(--text-dim);
+    font-family: inherit;
+    font-size: 10px;
+    line-height: 1.6;
+    cursor: pointer;
+    transition: color .15s ease, border-color .15s ease, background-color .15s ease;
+}
+
+.text-btn:hover{
+    background-color: var(--track);
+    border-color: var(--accent-dim);
+    color: var(--text);
+}
+
+.back-btn:focus-visible, .text-btn:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+}
+
+/* One line: the page's own title matters less here than the videos under it. */
+.videos-title{
+    flex: 1;
+    min-width: 0;
+    font-size: 11px;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Everything the list says when it is not showing rows: loading, empty, cut off. */
+.videos-note{
+    padding: 10px 4px;
+    color: var(--text-dim);
+    font-size: 10px;
+    line-height: 1.5;
+    text-align: center;
+}
+
+/* Rows --------------------------------------------------------------------- */
+
+.video-list{
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* These rows are still the previous results, so they are shown but not offered: they
+   would otherwise read as answers to the search already being waited on. */
+.video-list.stale{
+    opacity: .4;
+    pointer-events: none;
+}
+
+.video-row{
+    display: flex;
+    gap: 8px;
+    padding: 4px;
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background-color .15s ease, border-color .15s ease;
+}
+
+.video-row:hover{
+    background-color: var(--card);
+    border-color: var(--accent-dim);
+}
+
+.video-row:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+}
+
+.video-thumb{
+    position: relative;
+    flex-shrink: 0;
+    width: 76px;
+    height: 43px;
+    border-radius: 4px;
+    overflow: hidden;
+    background-color: var(--track);
+}
+
+/* Cropped rather than letterboxed, so every row is the same height whatever aspect
+   ratio the thumbnail comes back as. */
+.video-thumb img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.video-duration{
+    position: absolute;
+    right: 2px;
+    bottom: 2px;
+    padding: 0 3px;
+    border-radius: 2px;
+    background-color: rgba(0, 0, 0, .8);
+    color: #fff;
+    font-size: 9px;
+    line-height: 1.4;
+    font-variant-numeric: tabular-nums;
+}
+
+.video-text{
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    justify-content: center;
+}
+
+/* Two lines, then clipped: titles are long and the row height has to stay fixed. */
+.video-title{
+    font-size: 11px;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.video-meta{
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-dim);
+    font-size: 9px;
+    white-space: nowrap;
+}
+
+/* The channel is the part that gives way: it is the only piece here long enough to
+   push the age out of the row, and the age is short and fixed. */
+.video-channel{
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.meta-dot{
+    flex-shrink: 0;
+}
+
+.short-badge{
+    flex-shrink: 0;
+    padding: 0 4px;
+    border-radius: 3px;
+    background-color: var(--accent-soft);
+    color: var(--accent);
+    font-size: 8px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}

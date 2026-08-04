@@ -8,11 +8,15 @@ import type { NoPlayerReason } from '../lib/tabState';
 import { probePageInTab } from '../lib/pageProbe';
 import type { PageProbe } from '../lib/pageProbe';
 import runScript from '../lib/runScript';
+import TabVideosView from '../components/TabVideosView';
 
 const Popup = () => {
   const [tabs, setTabs] = useState<chrome.tabs.Tab[]>([]);
   const [probes, setProbes] = useState<Record<number, PageProbe>>({});
   const [loaded, setLoaded] = useState(false);
+  // Which tab the popup has drilled into, or null for the list. This is navigation
+  // inside the popup only — the browser stays on whatever tab it was on.
+  const [openTabId, setOpenTabId] = useState<number | null>(null);
   // The probe loop reads the tab list through a ref so that re-reading the tabs
   // does not tear down and rebuild the interval.
   const tabsRef = useRef<chrome.tabs.Tab[]>([]);
@@ -95,6 +99,14 @@ const Popup = () => {
     // as a full card before dropping into one of the groups below.
   }
 
+  // The open tab is resolved from the live list rather than copied into state, so the
+  // screen keeps following the tab as the poll refreshes it. It comes back undefined
+  // once the tab is closed, which the screen reports instead of the popup going blank.
+  if(openTabId !== null){
+    const openTab = tabs.find(tab => tab.id === openTabId);
+    return (<TabVideosView tab={openTab} onBack={() => setOpenTabId(null)}/>);
+  }
+
   return (
     <div className="all-tabs-view">
       {
@@ -118,7 +130,21 @@ const Popup = () => {
         <div className="tab-group-header">No media</div>
       }
       {
-        noMedia.map((tab) => (<TabInfoView key={tab.id} tab={tab} reason="no-media" variant="plain"/>))
+        // These pages have no player to control, but they do list videos, so the card
+        // opens a screen of its own showing them.
+        noMedia.map((tab) => {
+          const id = tab.id;
+          return (
+            <TabInfoView
+              key={id}
+              tab={tab}
+              reason="no-media"
+              variant="plain"
+              // A tab with no id cannot be looked up again, so it stays a plain card.
+              onOpen={id === undefined ? undefined : () => setOpenTabId(id)}
+            />
+          );
+        })
       }
     </div>
   );

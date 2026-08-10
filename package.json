@@ -1,12 +1,14 @@
 {
-  "name": "package.json",
+  "name": "ytoverseer",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "npm run typecheck && vite build",
     "build:watch": "vite build --watch",
+    "icons": "node scripts/build-icons.mjs",
+    "pack": "npm run build && cd dist && tar -a -cf ../ytoverseer.zip *",
     "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.node.json",
     "lint": "eslint .",
     "preview": "vite preview"

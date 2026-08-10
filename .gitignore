@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Chrome Web Store upload bundles
+*.zip
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

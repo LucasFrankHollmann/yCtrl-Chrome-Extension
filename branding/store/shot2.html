@@ -1,0 +1,273 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>ytOverseer store shot 2</title>
+<link rel="stylesheet" href="./popup.css">
+<style>
+  html, body {
+    width: 1280px !important;
+    height: 800px;
+    margin: 0;
+    overflow: hidden;
+    background: #14101c;
+  }
+  body { font-family: 'Roboto', 'Inter', Arial, sans-serif; color: #ece6db; }
+
+  .canvas {
+    position: relative;
+    width: 1280px;
+    height: 800px;
+    display: grid;
+    grid-template-columns: 640px 1fr;
+    gap: 44px;
+    padding: 52px 48px;
+    box-sizing: border-box;
+    background:
+      radial-gradient(1000px 620px at 14% 8%, rgba(99, 102, 241, .20), transparent 62%),
+      radial-gradient(760px 560px at 96% 96%, rgba(139, 47, 214, .18), transparent 60%),
+      #14101c;
+  }
+
+  .stage { position: relative; }
+
+  .popup-frame {
+    width: 320px;
+    zoom: 1.86;
+    border-radius: 10px;
+    background: #1b1625;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, .55), 0 0 0 1px rgba(255, 255, 255, .06);
+    overflow: hidden;
+    padding-top: 2px;
+  }
+  .popup-frame .tab-videos-view { max-height: none !important; overflow: visible !important; }
+
+  .marker {
+    position: absolute;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: #7c4dff;
+    color: #fff;
+    font-size: 15px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 0 3px rgba(20, 16, 28, .95), 0 2px 8px rgba(0, 0, 0, .5);
+    z-index: 5;
+  }
+
+  .side { display: flex; flex-direction: column; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand img { width: 42px; height: 42px; }
+  .brand h1 { margin: 0; font-size: 29px; font-weight: 700; letter-spacing: -.01em; }
+  .tagline {
+    margin: 14px 0 30px;
+    font-size: 17px; line-height: 1.45;
+    color: rgba(236, 230, 219, .72);
+  }
+
+  .legend { display: flex; flex-direction: column; gap: 34px; }
+  .item { display: grid; grid-template-columns: 26px 1fr; gap: 13px; align-items: start; }
+  .num {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: rgba(124, 77, 255, .22);
+    border: 1px solid rgba(124, 77, 255, .65);
+    color: #b39dff;
+    font-size: 14px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+  }
+  .item b { font-size: 16.5px; font-weight: 600; display: block; line-height: 1.35; }
+  .item span { font-size: 14.5px; line-height: 1.45; color: rgba(236, 230, 219, .62); }
+
+  .footnote { margin-top: auto; font-size: 12px; color: rgba(236, 230, 219, .38); }
+</style>
+
+<div class="canvas">
+  <div class="stage">
+    <div class="popup-frame"><div id="root"></div></div>
+  </div>
+  <div class="side">
+    <div class="brand">
+      <img src="./icons/icon128.png" alt="">
+      <h1>ytOverseer</h1>
+    </div>
+    <p class="tagline">
+      Search YouTube and open what you find, all from the popup. The tab does the
+      navigating; you never leave the page you are on.
+    </p>
+    <div class="legend" id="legend"></div>
+    <p class="footnote">Search results and thumbnails shown are placeholders.</p>
+  </div>
+</div>
+
+<script>
+  const QUERY = "space documentaries";
+  const now = Date.now();
+
+  const VIDEOS = [
+    { videoId: "demoA", title: "The edge of the solar system, mapped in real data",
+      channel: "Orbital Notes", duration: "18:42", published: "2 weeks ago" },
+    { videoId: "demoB", title: "What a century of telescope upgrades actually changed",
+      channel: "Deep Field", duration: "24:07", published: "1 month ago" },
+    { videoId: "demoC", title: "Why deep space probes keep outliving their missions",
+      channel: "Orbital Notes", duration: "12:15", published: "3 months ago" },
+    { videoId: "demoD", title: "Building a radio dish in a valley with no signal",
+      channel: "Long Baseline", duration: "31:58", published: "5 months ago" },
+    { videoId: "demoE", title: "The quiet decade before the first exoplanet",
+      channel: "Deep Field", duration: "09:33", published: "1 year ago" }
+  ].map(v => ({ ...v, url: "https://www.youtube.com/watch?v=" + v.videoId, isShort: false }));
+
+  const TABS = [
+    {
+      id: 4,
+      title: QUERY + " - YouTube",
+      url: "https://www.youtube.com/results?search_query=" + encodeURIComponent(QUERY),
+      lastAccessed: now - 20000,
+      index: 3,
+      windowId: 1,
+      video: null
+    }
+  ];
+
+  const byId = (id) => TABS.find(t => t.id === id);
+
+  window.chrome = {
+    runtime: { lastError: undefined, sendMessage: () => {} },
+    tabs: {
+      query: (info, cb) => cb(info && info.active ? [TABS[0]] : TABS),
+      get: (id, cb) => cb(byId(id)),
+      remove: () => {}, update: () => {}, create: () => {},
+      onUpdated: { addListener: () => {} },
+      onRemoved: { addListener: () => {} }
+    },
+    scripting: {
+      executeScript: ({ target, func, args }, cb) => {
+        const body = func.toString();
+
+        // Each injected reader is recognised by a literal it carries, because it would
+        // otherwise scrape this page instead of the YouTube tab it expects.
+        if (body.includes("ytd-rich-item-renderer"))
+          return cb([{ result: { videos: VIDEOS, total: 47, query: QUERY } }]);
+        if (body.includes("ytSearchboxComponentInput") || body.includes("ytd-topbar-logo-renderer"))
+          return cb([{ result: true }]);
+
+        // Everything else reads the page's <video>, so a staged one answers them all.
+        const tab = byId(target.tabId);
+        const videos = tab && tab.video ? [tab.video] : [];
+        const real = document.getElementsByTagName.bind(document);
+        document.getElementsByTagName = (tag) => tag === "video" ? videos : real(tag);
+        let result;
+        try { result = func.apply(null, args || []); }
+        finally { document.getElementsByTagName = real; }
+        cb([{ result }]);
+      }
+    }
+  };
+</script>
+<script type="module" src="./popup.js"></script>
+
+<script>
+  const CALLOUTS = [
+    { sel: ".videos-search", at: "left",
+      title: "Search from the popup",
+      text: "Your query is typed into the page's own search box and submitted, so YouTube navigates itself and keeps its history." },
+    { sel: ".video-row:nth-of-type(2)", at: "left",
+      title: "Everything the page lists",
+      text: "Title, channel, length and age, read straight off the tab, in the page's own language." },
+    { sel: ".video-row:nth-of-type(4)", at: "right",
+      title: "Opens in the background",
+      text: "Clicking a row opens it in a new tab beside its source. The popup stays open, so you can pick several." },
+    { sel: ".text-btn", at: "right",
+      title: "Back to the feed",
+      text: "home clicks YouTube's own logo, rather than pointing the tab at a URL." }
+  ];
+
+  // Neutral stand-ins for the real thumbnails, which would otherwise pull artwork for
+  // actual videos into the listing.
+  function thumb(i) {
+    const c = document.createElement("canvas");
+    c.width = 320; c.height = 180;
+    const g = c.getContext("2d");
+    const hue = 250 + i * 26;
+    const grad = g.createLinearGradient(0, 0, 320, 180);
+    grad.addColorStop(0, `hsl(${hue}, 42%, 30%)`);
+    grad.addColorStop(1, `hsl(${hue + 34}, 38%, 16%)`);
+    g.fillStyle = grad;
+    g.fillRect(0, 0, 320, 180);
+    g.fillStyle = "rgba(255,255,255,.07)";
+    g.beginPath();
+    g.arc(232, 42, 78, 0, Math.PI * 2);
+    g.fill();
+    return c.toDataURL("image/png");
+  }
+
+  function place() {
+    const stage = document.querySelector(".stage");
+    const legend = document.getElementById("legend");
+    const base = stage.getBoundingClientRect();
+
+    document.querySelectorAll(".popup-frame .video-thumb img").forEach((img, i) => {
+      img.src = thumb(i);
+    });
+
+    CALLOUTS.forEach((c, i) => {
+      const n = i + 1;
+      const row = document.createElement("div");
+      row.className = "item";
+      row.innerHTML = '<div class="num">' + n + '</div><div><b></b><span></span></div>';
+      row.querySelector("b").textContent = c.title;
+      row.querySelector("span").textContent = c.text;
+      legend.appendChild(row);
+
+      const el = document.querySelector(".popup-frame " + c.sel);
+      if (!el) {
+        (window.__warnings = window.__warnings || []).push("callout missed: " + c.sel);
+        return;
+      }
+
+      const box = el.getBoundingClientRect();
+      const marker = document.createElement("div");
+      marker.className = "marker";
+      marker.textContent = n;
+      const cx = box.left + box.width / 2 - base.left;
+      const cy = box.top + box.height / 2 - base.top;
+      let x, y;
+      if (c.at === "left")       { x = box.left - base.left - 36; y = cy; }
+      else if (c.at === "right") { x = box.right - base.left + 10; y = cy; }
+      else if (c.at === "top")   { x = cx;                        y = box.top - base.top - 36; }
+      marker.style.left = (x - 14) + "px";
+      marker.style.top = (y - 14) + "px";
+      stage.appendChild(marker);
+    });
+
+    document.title = "ready";
+  }
+
+  // Drive the real navigation: click the tab's card to reach the videos screen, then
+  // put the query in the box the way a person would, through the input event React
+  // listens for.
+  function typeQuery() {
+    const input = document.querySelector(".popup-frame .search-input");
+    if (!input) return false;
+    const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set;
+    set.call(input, QUERY);
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    return true;
+  }
+
+  const start = Date.now();
+  let clicked = false, typed = false;
+  const step = setInterval(() => {
+    if (!clicked) {
+      const card = document.querySelector(".popup-frame .tab-info-view.plain");
+      if (card) { card.click(); clicked = true; }
+    }
+    else if (!typed && document.querySelectorAll(".popup-frame .video-row").length >= 5) {
+      typed = typeQuery();
+    }
+    else if (typed) {
+      clearInterval(step);
+      place();
+    }
+
+    if (Date.now() - start > 12000) { clearInterval(step); place(); }
+  }, 150);
+</script>

@@ -1,0 +1,282 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>ytOverseer store shot</title>
+<link rel="stylesheet" href="./popup.css">
+<style>
+  /* popup.css pins body to 320px for the real popup; reclaim the full canvas. */
+  html, body {
+    width: 1280px !important;
+    height: 800px;
+    margin: 0;
+    overflow: hidden;
+    background: #14101c;
+  }
+  body {
+    font-family: 'Roboto', 'Inter', Arial, sans-serif;
+    color: #ece6db;
+  }
+
+  .canvas {
+    position: relative;
+    width: 1280px;
+    height: 800px;
+    display: grid;
+    grid-template-columns: 600px 1fr;
+    gap: 40px;
+    padding: 44px 48px;
+    box-sizing: border-box;
+    background:
+      radial-gradient(1000px 620px at 14% 8%, rgba(99, 102, 241, .20), transparent 62%),
+      radial-gradient(760px 560px at 96% 96%, rgba(139, 47, 214, .18), transparent 60%),
+      #14101c;
+  }
+
+  /* Left: the real popup ------------------------------------------------- */
+
+  .stage { position: relative; }
+
+  .popup-frame {
+    width: 320px;
+    zoom: 1.78;               /* re-lays out larger, so text stays crisp */
+    border-radius: 10px;
+    background: #1b1625;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, .55), 0 0 0 1px rgba(255, 255, 255, .06);
+    overflow: hidden;
+  }
+  /* The real popup scrolls at 560px; the shot has to show every card. */
+  .popup-frame .all-tabs-view { max-height: none !important; overflow: visible !important; }
+
+  /* Numbered markers, positioned from the live DOM by the script below. */
+  .marker {
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #7c4dff;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 0 3px rgba(20, 16, 28, .95), 0 2px 8px rgba(0, 0, 0, .5);
+    z-index: 5;
+  }
+
+  /* Right: the legend ---------------------------------------------------- */
+
+  .side { display: flex; flex-direction: column; }
+
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand img { width: 40px; height: 40px; }
+  .brand h1 { margin: 0; font-size: 27px; font-weight: 700; letter-spacing: -.01em; }
+  .tagline {
+    margin: 9px 0 20px;
+    font-size: 15px;
+    line-height: 1.45;
+    color: rgba(236, 230, 219, .68);
+  }
+
+  .legend { display: flex; flex-direction: column; gap: 10px; }
+
+  .item { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; }
+  .num {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: rgba(124, 77, 255, .22);
+    border: 1px solid rgba(124, 77, 255, .65);
+    color: #b39dff;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+  }
+  .item b { font-size: 14px; font-weight: 600; display: block; line-height: 1.35; }
+  .item span { font-size: 13px; line-height: 1.4; color: rgba(236, 230, 219, .62); }
+
+  .footnote {
+    margin-top: auto;
+    font-size: 11.5px;
+    color: rgba(236, 230, 219, .38);
+  }
+</style>
+
+<div class="canvas">
+  <div class="stage">
+    <div class="popup-frame"><div id="root"></div></div>
+  </div>
+
+  <div class="side">
+    <div class="brand">
+      <img src="./icons/icon128.png" alt="">
+      <h1>ytOverseer</h1>
+    </div>
+    <p class="tagline">
+      Every YouTube tab you have open, on one panel. See what is playing, and
+      control it without leaving the tab you are on.
+    </p>
+
+    <div class="legend" id="legend"></div>
+
+    <p class="footnote">Tab titles and playback values shown are examples.</p>
+  </div>
+</div>
+
+<script>
+  // ---- Staged tabs ----------------------------------------------------------
+  // The real popup.js runs untouched; only the chrome APIs underneath it are
+  // stubbed, so what renders is the actual interface.
+  const now = Date.now();
+
+  const TABS = [
+    {
+      id: 1,
+      title: "Voyager 1 is still talking to us - here's how",
+      url: "https://www.youtube.com/watch?v=demo1",
+      lastAccessed: now - 4000,
+      video: { duration: 745, currentTime: 64, paused: false, playbackRate: 1.25,
+               volume: 1.5, muted: false, readyState: 1 }
+    },
+    {
+      id: 2,
+      title: "Slow Motion - Coastal Lines - YouTube Music",
+      url: "https://music.youtube.com/watch?v=demo2",
+      lastAccessed: now - 9000,
+      video: { duration: 295, currentTime: 83, paused: false, playbackRate: 1,
+               volume: 1, muted: false, readyState: 1 }
+    },
+    {
+      id: 3,
+      title: "The physics of skateboarding, explained",
+      url: "https://www.youtube.com/watch?v=demo3",
+      lastAccessed: now - 26 * 60000,
+      discarded: true,
+      video: null
+    },
+    {
+      id: 4,
+      title: "lofi hip hop - YouTube",
+      url: "https://www.youtube.com/results?search_query=lofi+hip+hop",
+      lastAccessed: now - 20000,
+      video: null
+    }
+  ];
+
+  const byId = (id) => TABS.find(t => t.id === id);
+
+  window.chrome = {
+    runtime: { lastError: undefined, sendMessage: () => {} },
+    tabs: {
+      query: (info, cb) => cb(info && info.active ? [TABS[0]] : TABS),
+      get: (id, cb) => cb(byId(id)),
+      remove: () => {},
+      onUpdated: { addListener: () => {} },
+      onRemoved: { addListener: () => {} }
+    },
+    scripting: {
+      // Every injected function reads the page through getElementsByTagName,
+      // so swapping that for the tab's staged <video> drives all of them.
+      executeScript: ({ target, func, args }, cb) => {
+        const tab = byId(target.tabId);
+        const videos = tab && tab.video ? [tab.video] : [];
+        const real = document.getElementsByTagName.bind(document);
+        document.getElementsByTagName = (tag) => tag === "video" ? videos : real(tag);
+        let result;
+        try { result = func.apply(null, args || []); }
+        finally { document.getElementsByTagName = real; }
+        cb([{ result }]);
+      }
+    }
+  };
+</script>
+<script type="module" src="./popup.js"></script>
+
+<script>
+  // ---- Callouts ------------------------------------------------------------
+  // Anchored to the live elements, so the markers cannot drift from what they
+  // point at even if the layout changes.
+  const CALLOUTS = [
+    { sel: ".tab-view:nth-of-type(1) .controlls-btn-preview", at: "left",
+      title: "Live preview",
+      text: "Pull the current frame into the popup and watch it update, without switching tabs." },
+    { sel: ".tab-view:nth-of-type(1) .controlls-btn-pip", at: "top",
+      title: "Picture-in-picture",
+      text: "Pop the video into a floating window, even where the page tries to block it." },
+    { sel: ".tab-view:nth-of-type(1) .x-span", at: "right",
+      title: "Close the tab",
+      text: "Drop a tab straight from the list once you are done with it." },
+    { sel: ".tab-view:nth-of-type(1) .controlls-view", at: "left",
+      title: "Full transport",
+      text: "Play or pause, jump 15 seconds either way, and skip to the previous or next video." },
+    { sel: ".tab-view:nth-of-type(1) .slider-view", at: "left",
+      title: "Elapsed time and seek",
+      text: "Read how far along each tab is, and drag to move anywhere in it." },
+    { sel: ".tab-view:nth-of-type(1) .volume-view", at: "left",
+      title: "Volume up to 500%",
+      text: "Per-tab volume with mute, boosted past 100% through a gain node for quiet videos." },
+    { sel: ".tab-view:nth-of-type(1) .speed-view", at: "left",
+      title: "Playback speed 0-5x",
+      text: "Step by 0.1x or drag; click the number to snap back to 1x." },
+    { sel: ".tab-view:nth-of-type(2) .title-view", at: "left",
+      title: "YouTube Music aware",
+      text: "Music tabs get controls wired to their own player bar, so skipping moves the queue." },
+    { sel: ".tab-info-view.inactive .reason-badge", at: "left",
+      title: "Sleeping tabs, explained",
+      text: "Tabs Chrome unloaded to save memory say so, and wake restores one and hands the focus back." },
+    { sel: ".tab-info-view.plain .go-hint", at: "right",
+      title: "Browse without switching",
+      text: "Pages with nothing playing list their videos inside the popup, searchable." }
+  ];
+
+  function place() {
+    const stage = document.querySelector(".stage");
+    const legend = document.getElementById("legend");
+    const base = stage.getBoundingClientRect();
+
+    CALLOUTS.forEach((c, i) => {
+      const n = i + 1;
+
+      const row = document.createElement("div");
+      row.className = "item";
+      row.innerHTML = '<div class="num">' + n + '</div><div><b></b><span></span></div>';
+      row.querySelector("b").textContent = c.title;
+      row.querySelector("span").textContent = c.text;
+      legend.appendChild(row);
+
+      const el = document.querySelector(".popup-frame " + c.sel);
+      if (!el) {
+        (window.__warnings = window.__warnings || []).push("callout missed: " + c.sel);
+        return;
+      }
+
+      const box = el.getBoundingClientRect();
+      const marker = document.createElement("div");
+      marker.className = "marker";
+      marker.textContent = n;
+
+      // getBoundingClientRect already accounts for the frame's zoom.
+      let x, y;
+      const cx = box.left + box.width / 2 - base.left;
+      const cy = box.top + box.height / 2 - base.top;
+      if (c.at === "left")             { x = box.left - base.left - 34; y = cy; }
+      else if (c.at === "right")       { x = box.right - base.left + 8;  y = cy; }
+      else if (c.at === "top")         { x = cx;                        y = box.top - base.top - 36; }
+      marker.style.left = (x - 13) + "px";
+      marker.style.top = (y - 13) + "px";
+      stage.appendChild(marker);
+    });
+
+    document.title = "ready";
+  }
+
+  // The popup polls on a 1s timer before it has values to show, so wait for the
+  // cards to actually carry state instead of racing the first paint.
+  const start = Date.now();
+  const wait = setInterval(() => {
+    const ready = document.querySelectorAll(".popup-frame .tab-view").length >= 2
+      && document.querySelector(".popup-frame .tab-info-view.plain")
+      && document.querySelector(".popup-frame .controlls-time-span1")
+      && document.querySelector(".popup-frame .controlls-time-span1").textContent !== "00:00";
+    if (ready || Date.now() - start > 8000) { clearInterval(wait); place(); }
+  }, 120);
+</script>
